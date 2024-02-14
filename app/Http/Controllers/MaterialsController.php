@@ -40,6 +40,16 @@ class MaterialsController extends Controller
             $material->material_name = $request['material_name'];
             $material->opening_balance = $request['opening_balance'];
             if($material->save()){
+
+                //add the new inward details with current opening balance
+                $inwardoutward = new InwardOutward;
+                $inwardoutward->material_id = $material->material_id;
+                $inwardoutward->balance = '0';
+                $inwardoutward->quantity = $material->opening_balance;
+                $inwardoutward->date = date('Y-m-d');
+                $inwardoutward->current_opening_balance = $inwardoutward->balance + $inwardoutward->quantity;
+                $inwardoutward -> save();
+
                 return redirect('/show_materials')->with('msg','<div class="alert alert-success">Material added succesfully</div>');
             }else{
                 return redirect('/show_materials')->with('msg','<div class="alert alert-success">Material not added</div>');
@@ -52,10 +62,11 @@ class MaterialsController extends Controller
 
     //Get the list of all the materials
     public function listMaterials(Request $request){
-        $materials = DB::table('materials as mat')
-        ->leftJoin('inward_outward as io', 'io.material_id', '=', 'mat.material_id')->whereNull('mat.deleted_at')
-        ->select('mat.material_id', 'mat.category_id', 'mat.material_name', 'mat.opening_balance', 'io.quantity')
-        ->get();
+        // $materials = DB::table('materials as mat')
+        // ->leftJoin('inward_outward as io', 'io.material_id', '=', 'mat.material_id')->whereNull('mat.deleted_at')->where('io.balance','!=','0')
+        // ->select('mat.material_id', 'mat.category_id', 'mat.material_name', 'mat.opening_balance', 'io.quantity','io.current_opening_balance','io.balance')
+        // ->get();
+        $materials = DB::table('materials as mat')->leftJoin('categories as cat','mat.category_id','=','cat.id')->select('mat.material_id','mat.material_name','mat.opening_balance','cat.category_name')->get();
         if($request['value'] != ''){
             $basic_details = 'on';
         }else{
@@ -114,12 +125,16 @@ class MaterialsController extends Controller
         
             //Get the url parameter so that based on which update page called it, the redirection will be done to that respective listings
             if(isset($request["current_balance"])){
-                $redirection_url = "/list_materials/basic_details";
+                $redirection_url = "/list_materials";
             }else{
                 $redirection_url = "/show_materials";
             }
 
             if($material->save()){
+                $inward_outward = InwardOutward::where('material_id',"=",$request['material_id'])->latest()->first();
+                $inward_outward->current_opening_balance = $request['opening_balance'];
+                $inward_outward->save();
+
                 return redirect($redirection_url)->with('msg','<div class="alert alert-success">Material updated succesfully</div>');
             }else{
                 return redirect($redirection_url)->with('msg','<div class="alert alert-success">Material not updated</div>');

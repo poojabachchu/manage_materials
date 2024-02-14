@@ -45,7 +45,7 @@
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                     <a class="dropdown-item" href="/add_inward_outward">Add Inward/Outward</a>
                     
-                    <a class="dropdown-item" href="/show_inwardoutward">Show Inward/Outward</a>
+                    <!-- <a class="dropdown-item" href="/show_inwardoutward">Show Inward/Outward</a> -->
                     <a class="dropdown-item" href="/list_materials?basic_details=on">List Materials</a>
                     </div>
                 </li>

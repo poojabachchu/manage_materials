@@ -36,9 +36,9 @@ Route::get('/show_materials',[MaterialsController::class,'listMaterials']);
 Route::get('/delete_material',[MaterialsController::class,'deleteMaterial']);
 Route::get('/edit_material/{id}',[MaterialsController::class,'editMaterial']);
 Route::post('/update_material',[MaterialsController::class,'updateMaterial']);
-Route::get('/list_materials',[MaterialsController::class,'listMaterials']);
 
 
+Route::get('/list_materials',[InwardOutwardController::class,'listMaterials']);
 Route::get('/add_inward_outward',[InwardOutwardController::class,'addInwardoutward']);
 Route::post('/add_inwardoutward',[InwardOutwardController::class,'insert']);
 Route::get('/getMaterials',[InwardOutwardController::class,'getMaterials']);

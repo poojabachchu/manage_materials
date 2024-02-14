@@ -42,20 +42,23 @@ class InwardOutwardController extends Controller
             'quantity'=>'required|numeric|regex:/^[-+]?\d+(\.\d{1,2})?$/',
         ]);
 
-        $inward_outward_exists = InwardOutward::where('material_id','=',$request['material_id'])->count();
-        if($inward_outward_exists == 0){
-            $inwardoutward = new InwardOutward;
-            $inwardoutward->material_id = $request['material_id'];
-            $inwardoutward->date = $request['date'];
-            $inwardoutward->quantity = $request['quantity'];
-            if($inwardoutward -> save()){
-                return redirect('/show_inwardoutward')->with('msg','<div class="alert alert-success">Inward/Outward added succesfully</div>');
-            }else{
-                return redirect('/add_inward_outward')->with('msg','<div class="alert alert-danger">Inward/Outward not added</div>');
-            }
-        }
-        else{
-            return redirect()->back()->withInput()->with('msg','<div class="alert alert-danger">Details already exists!</div>');
+        //get the opening_balance of material selected
+        $material = Material::select('material_id','opening_balance')->where('material_id','=',$request['material_id'])->first();
+        $opening_balance = $material['opening_balance'];
+
+        $inwardoutward = new InwardOutward;
+        $inwardoutward->material_id = $request['material_id'];
+        $inwardoutward->date = $request['date'];
+        $inwardoutward->quantity = $request['quantity'];
+        $inwardoutward->balance = $opening_balance;
+        $inwardoutward->current_opening_balance = $opening_balance+$request['quantity'];
+
+        if($inwardoutward -> save()){
+            $material->opening_balance = $opening_balance+$request['quantity'];
+            $material->save();
+            return redirect('/add_inward_outward')->with('msg','<div class="alert alert-success">Inward/Outward added succesfully</div>');
+        }else{
+            return redirect('/add_inward_outward')->with('msg','<div class="alert alert-danger">Inward/Outward not added</div>');
         }
     }
 
@@ -106,4 +109,15 @@ class InwardOutwardController extends Controller
             return redirect('/show_inwardoutward')->with('msg','<div class="alert alert-success">Inward/Outward not updated</div>');
         }
     }
+
+        //Get the list of all the materials
+        public function listMaterials(Request $request){
+            $materials = DB::table('materials as mat')
+            ->leftJoin('inward_outward as io', 'io.material_id', '=', 'mat.material_id')->whereNull('mat.deleted_at')->where('io.balance','!=','0')
+            ->select('mat.material_id', 'mat.category_id', 'mat.material_name', 'mat.opening_balance', 'io.quantity','io.current_opening_balance','io.balance')
+            ->get();
+
+            $data = compact('materials');
+            return view('inward_outward/list_materials')->with($data);
+        }
 }
