@@ -121,7 +121,7 @@ class MaterialsController extends Controller
 
             $material->material_name = $request['material_name'];
             $material->category_id = $request['category'];
-            $material->opening_balance = $request['opening_balance'];
+            //$material->opening_balance = $request['opening_balance'];
         
             //Get the url parameter so that based on which update page called it, the redirection will be done to that respective listings
             if(isset($request["current_balance"])){
