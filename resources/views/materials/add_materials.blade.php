@@ -41,7 +41,14 @@
         <div class="row">
             <div class="col-lg-4">
                 <label for="exampleInputPassword1">Opening Balance</label>
-                <input type="number" class="form-control" id="opening_balance" placeholder="Opening Balance" min="0" max="1000" step="0.01" name="opening_balance" pattern="[0-9]*[.,]?[0-9]*" value="{{$material[0]['opening_balance'] ?? old('opening_balance') }}" required>   
+                <?php
+                    if(isset($material[0]['opening_balance']) && $material[0]['opening_balance'] != ""){
+                        $readonly = 'readonly';
+                    }else{
+                        $readonly = '';
+                    }
+                ?>
+                <input type="number" class="form-control" id="opening_balance" placeholder="Opening Balance" min="0" max="1000" step="0.01" name="opening_balance" pattern="[0-9]*[.,]?[0-9]*" value="{{$material[0]['opening_balance'] ?? old('opening_balance') }}" required {{$readonly}}>   
                 <span class="text-danger">
                     @error('opening_balance')
                         {{$message}}
